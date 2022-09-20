@@ -10,10 +10,26 @@ function App() {
 
   useEffect(() => {
     if (timerState === 'play') {
-      setTimeout(() => {
+      const timeoutEffect = setTimeout(() => {
         setTimer(timer - 1);
+        if (timer < 60) {
+          setAlarmColor({ color: 'red' });
+        } else {
+          setAlarmColor({ color: 'white' });
+        }
       }, 1000);
+      if (timer < 0 || timerState === 'pause') {
+        clearTimeout(timeoutEffect);
+        if (timerType === 'Session') {
+          setTimer(breakLength * 60);
+          setTimerType('Break');
+        } else {
+          setTimer(sessionLength * 60);
+          setTimerType('Session');
+        }
+      }
     }
+    // eslint-disable-next-line
   }, [timerState, timer]);
 
   const controlTimer = () => {
@@ -26,11 +42,12 @@ function App() {
     setAlarmColor({ color: 'white' });
     setTimerType('Session');
     setTimerState('pause');
+    setTimer(0);
     setTimer(1500);
   };
 
   const clockify = () => {
-    if (timer < 0) return '00:00';
+    if (timer <= 0) return '00:00';
     let minutes = Math.floor(timer / 60);
     let seconds = timer - minutes * 60;
     seconds = seconds < 10 ? '0' + seconds : seconds;
@@ -40,28 +57,34 @@ function App() {
 
   return (
     <div>
-      <div className='main-title'>
-        {sessionLength} + {breakLength} Clock
-      </div>
+      <div className='main-title'>25 + 5 Clock</div>
       <TimerLengthControl
         addID='break-increment'
         length={breakLength}
         lengthID='break-length'
         minID='break-decrement'
-        onClick1={() => setBreakLength((prev) => prev - 1)}
+        onClick1={() => {
+          if (breakLength !== 1) setBreakLength((prev) => prev - 1);
+        }}
         title='Break Length'
         titleID='break-label'
-        onClick2={() => setBreakLength((prev) => prev + 1)}
+        onClick2={() => {
+          if (breakLength !== 60) setBreakLength((prev) => prev + 1);
+        }}
       />
       <TimerLengthControl
         addID='session-increment'
         length={sessionLength}
         lengthID='session-length'
         minID='session-decrement'
-        onClick1={() => setSessionLength((prev) => prev - 1)}
+        onClick1={() => {
+          if (sessionLength !== 1) setSessionLength((prev) => prev - 1);
+        }}
         title='Session Length'
         titleID='session-label'
-        onClick2={() => setSessionLength((prev) => prev + 1)}
+        onClick2={() => {
+          if (sessionLength !== 60) setSessionLength((prev) => prev + 1);
+        }}
       />
       <div className='timer' style={alarmColor}>
         <div className='timer-wrapper'>
